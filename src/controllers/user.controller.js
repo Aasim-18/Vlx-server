@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Otp } from "../models/otp.model.js";
 import { sendEmail, generateOtp } from "../utils/generateOtp.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async(userId) => {
   try {
@@ -17,6 +18,7 @@ const generateAccessAndRefreshTokens = async(userId) => {
         return {accessToken, refreshToken}
 
   } catch (error) {
+    console.error("Error generating tokens:", error);
     throw new ApiError(500, "Failed to generate Access and Refresh Token")
   }
 }
