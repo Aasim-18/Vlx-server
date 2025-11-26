@@ -8,8 +8,8 @@ import { sendEmail, generateOtp } from "../utils/generateOtp.js";
 const generateAccessAndRefreshTokens = async(userId) => {
   try {
     const user = await User.findById(userId)
-    const refreshToken = await user.generateAccessToken();
-    const accessToken = user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+    const accessToken = await user.generateAccessToken();
     
     user.refreshToken = refreshToken
         await user.save({ validateBeforeSave: false })
