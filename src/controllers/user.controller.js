@@ -133,6 +133,7 @@ const Otpgenerate = asyncHandler(async (req, res) => {
     const {email} = req.body;
 
     const generatedOtp = await generateOtp();
+    
     console.log(generatedOtp)
 
     if (!generatedOtp) {
