@@ -37,14 +37,14 @@ const registerUser = asyncHandler( async (req, res) => {
        throw new ApiError(400, "All Fields are Required") 
     }
 
-   const allowedDomain = 'students.vnit.ac.in'
+  //  const allowedDomain = 'students.vnit.ac.in'
 
-   const emailDomain = email.split("@")[1];
+  //  const emailDomain = email.split("@")[1];
 
-   if(emailDomain !== allowedDomain) {
+  //  if(emailDomain !== allowedDomain) {
 
-  throw new ApiError(401, "Only Vnit Students email Address is Allowed")
-   }
+  // throw new ApiError(401, "Only Vnit Students email Address is Allowed")
+  //  }
 
 
     const exixteduser = await User.findOne({
