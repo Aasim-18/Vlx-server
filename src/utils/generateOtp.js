@@ -1,41 +1,40 @@
 import otpGenerator from "otp-generator";
-import nodemailer from "nodemailer";
 import { Otp } from "../models/otp.model.js";
+import {Resend} from "resend";
+import dotenv from "dotenv"
 
-const generateOtp = async () => {
-  const otp = otpGenerator.generate(6, {
-    Numbers: true,
-    lowerCaseAlphabets: false,
-    upperCaseAlphabets: false,
-    specialChars: false,
-  });
+
+
+dotenv.config({
+   path: './.env'
+})
+
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+
+  const generateOtp = async () => {
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
   return otp;
 };
 
 const sendEmail = async (email, otp) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
+  try {
+    const data = await resend.emails.send({
+      from: 'onboarding@resend.dev', 
+      to: email,
+      subject: 'Verification Otp',
+      html: `<p>Your OTP is <strong>${otp}</strong></p>`
+    });
     
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+    
+    return data; 
 
-  const mailOptions = {
-    from: `"Your App" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: "Your OTP Verification Code",
-    html: `
-      <h2>Your OTP Code</h2>
-      <p>Your OTP is: <b>${otp}</b></p>
-      <p>This OTP will expire in 5 minutes.</p>
-    `,
-  };
-
-  await transporter.sendMail(mailOptions);
-
-  return true;
+  } catch (error) {
+    console.log("Email Service Error:", error);
+    
+    return null; 
+  }
 };
 
 export { sendEmail, generateOtp };

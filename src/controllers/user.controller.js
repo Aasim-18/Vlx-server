@@ -127,39 +127,48 @@ return res.status(200)
 })
 
 
-
 const Otpgenerate = asyncHandler(async (req, res) => {
-  
-    const {email} = req.body;
-
-    const generatedOtp = await generateOtp();
     
-    console.log(generatedOtp)
+    const { email } = req.body;
 
-    if (!generatedOtp) {
-        throw new ApiError(500, "Error Occured While Generating Otp")
+    
+    if (!email) {
+        throw new ApiError(400, "Email field is required");
     }
 
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+    
+    const generatedOtp = await generateOtp();
+    
+    if (!generatedOtp) {
+        throw new ApiError(500, "Error Occurred While Generating OTP");
+    }
 
-    const otp = await Otp.create({
-      email,
-      otp: generatedOtp,
-      expiresAt
-    })
+    console.log("Generated OTP:", generatedOtp); 
 
-  const EmailSent = await sendEmail(email, generatedOtp);
+    // 3. Save to Database
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
 
-  if (!EmailSent) {
-    throw new ApiError(500, "Somthing went wrong while sending Email")
-  }
+    const otpPayload = await Otp.create({
+        email,
+        otp: generatedOtp,
+        expiresAt
+    });
 
-  return res.json(
-    new ApiResponse(204, "Email Sent")
-  )
+    
+    const EmailSent = await sendEmail(email, generatedOtp);
 
-})
+    
+    if (!EmailSent) {
+        
+        await Otp.findByIdAndDelete(otpPayload._id); 
+        throw new ApiError(500, "Failed to send email. Please try again.");
+    }
 
+   
+    return res.status(200).json(
+        new ApiResponse(200, "Email Sent Successfully", { email }) 
+    );
+});
 
 
 
