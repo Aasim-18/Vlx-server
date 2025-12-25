@@ -173,7 +173,7 @@ const Otpgenerate = asyncHandler(async (req, res) => {
 
 
 const verifyOtp = asyncHandler(async (req, res) => {
-  const { email, otp } = req.body;
+  const {email, otp} = req.body;
 
   if (!email || !otp) {
     throw new ApiError(402, "Email and OTP are required");
