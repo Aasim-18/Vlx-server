@@ -12,7 +12,8 @@ const otpSchema = new mongoose.Schema(
     },
 
     expiresAt: { type: Date,
-   required: true
+   required: true,
+   index: { expires: 0 }
    }
 
   },
@@ -20,12 +21,12 @@ const otpSchema = new mongoose.Schema(
 );
 
 
-otpSchema.pre("save", async function (next) {
+ otpSchema.pre("save", async function (next) {
   if (!this.isModified("otp")) return next();
 
-  this.otp = await bcrypt.hash(this.otp, 10);
+   this.otp = await bcrypt.hash(this.otp, 10);
   next();
-});
+ });
 
 
 otpSchema.methods.validateOtp = async function (enteredOtp) {

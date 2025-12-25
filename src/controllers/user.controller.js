@@ -145,13 +145,14 @@ const Otpgenerate = asyncHandler(async (req, res) => {
 
     console.log("Generated OTP:", generatedOtp); 
 
-    // 3. Save to Database
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
+    
     const otpPayload = await Otp.create({
         email,
         otp: generatedOtp,
         expiresAt
+        
     });
 
     
@@ -175,6 +176,8 @@ const Otpgenerate = asyncHandler(async (req, res) => {
 const verifyOtp = asyncHandler(async (req, res) => {
   const {email, otp} = req.body;
 
+ 
+
   if (!email || !otp) {
     throw new ApiError(402, "Email and OTP are required");
   }
@@ -185,14 +188,22 @@ const verifyOtp = asyncHandler(async (req, res) => {
     throw new ApiError(404, "OTP not found or expired");
   }
 
+
   if (record.expiresAt < Date.now()) {
-    throw new ApiError(400, "OTP expired");
+    await Otp.deleteOne({_id: record._id})
+    throw new ApiError(400, "Otp is Expired ")
   }
+
+  
 
   const isValid = await record.validateOtp(otp);
 
   if (!isValid) {
     throw new ApiError(404, "Invalid OTP");
+  }
+
+  if (isValid) {
+    console.log("user verified successfully")
   }
 
   const user = await User.findOneAndUpdate(
@@ -203,7 +214,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
     { new: true } 
   );
 
-  await Otp.deleteMany({ email });
+  await Otp.deleteOne({ _id: record._id });
 
   return res.status(200).json(
     new ApiResponse(200, "Email Verified Successfully")
