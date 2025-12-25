@@ -14,7 +14,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 
   const generateOtp = async () => {
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otp = Math.floor(100000 + Math.random() * 9000).toString();
   return otp;
 };
 
