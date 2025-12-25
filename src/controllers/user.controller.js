@@ -178,8 +178,8 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
  
 
-  if (!email || !otp) {
-    throw new ApiError(402, "Email and OTP are required");
+  if (!otp) {
+    throw new ApiError(402, "OTP is required");
   }
 
   const record = await Otp.findOne({ email });
