@@ -33,7 +33,7 @@ const registerUser = asyncHandler( async (req, res) => {
     
     
 
-    if ([fullName, email, phone, password, EnrollmentNumber].some((field) => field?.trim() === "")) {
+    if ([fullName, email, phone, password, EnrollmentNumber, selectedRole].some((field) => field?.trim() === "")) {
        throw new ApiError(400, "All Fields are Required") 
     }
 
@@ -62,7 +62,8 @@ const user = await User.create({
     password,
     email,
     EnrollmentNumber,
-    phone
+    phone,
+    selectedRole
 })
 
 const createdUser = await User.findById(user._id).select(
@@ -103,6 +104,8 @@ const loginUser = asyncHandler( async (req, res) => {
   }
 
   const {refreshToken, accessToken} = await generateAccessAndRefreshTokens(user._id);
+  console.log(accessToken);
+  
 
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
@@ -178,7 +181,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
  
 
-  if (!otp) {
+  if (!email || !otp) {
     throw new ApiError(402, "OTP is required");
   }
 
