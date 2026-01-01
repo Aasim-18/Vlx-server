@@ -1,10 +1,12 @@
 import { Attendance } from '../models/attendence.model.js';
 import { User } from '../models/user.model.js';
-// 1. Change Import: Point to your Resend service
-import { sendEmail } from '../utils/attendanceService.js'; 
+import { sendEmail } from '../utils/attendanceService.js'; // Ensure path is correct
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+
+// Helper function to pause execution
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const markAttendance = asyncHandler(async (req, res) => {
   const { date, courseId, records } = req.body;
@@ -14,19 +16,22 @@ const markAttendance = asyncHandler(async (req, res) => {
     throw new ApiError(400, "No attendance records provided");
   }
 
-  // 2. Create Attendance Record in DB
+  // 1. Create Attendance Record in DB
   const newRecord = await Attendance.create({ date, courseId, records });
 
   if (!newRecord) {
     throw new ApiError(500, "Failed to create attendance record");
   }
 
-  // 3. Send Emails (Using Promise.all for better performance)
-  const emailPromises = records.map(async (record) => {
+  // 2. Send Emails Sequentially with Delay
+  console.log(`📧 Starting email notifications for ${records.length} students...`);
+
+  // We use a simple FOR loop instead of map/Promise.all to allow waiting (await)
+  for (const record of records) {
     try {
       const student = await User.findById(record.studentId);
 
-      // Check for Email instead of Phone
+      // Check for Email
       if (student && student.email) {
         let subject = "";
         let htmlContent = "";
@@ -59,15 +64,15 @@ const markAttendance = asyncHandler(async (req, res) => {
 
         // Send Email via Resend
         await sendEmail(student.email, subject, htmlContent);
+        
+        // 🛑 CRITICAL: Wait 1 second before the next email to prevent "Rate Limit" errors
+        await sleep(1000); 
       }
     } catch (innerError) {
-      console.error(`Failed to send email to student ID ${record.studentId}:`, innerError);
-      // We do not throw here so other emails can still be sent
+      // Log error but continue the loop for other students
+      console.error(`❌ Failed to send email to student ID ${record.studentId}:`, innerError.message);
     }
-  });
-
-  // Wait for all emails to be processed
-  await Promise.all(emailPromises);
+  }
 
   return res.status(200).json(
     new ApiResponse(200, newRecord, "Attendance marked and emails sent successfully")
