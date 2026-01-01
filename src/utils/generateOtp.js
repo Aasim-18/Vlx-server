@@ -1,6 +1,7 @@
 import { Otp } from "../models/otp.model.js";
 import {Resend} from "resend";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import axios from 'axios';
 
 
 
@@ -9,7 +10,7 @@ dotenv.config({
 })
 
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 
   const generateOtp = async () => {
@@ -22,21 +23,47 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (email, otp) => {
   try {
-    const data = await resend.emails.send({
-      from: 'onboarding@resend.dev', 
-      to: email,
-      subject: 'Verification Otp',
-      html: `<p>Your OTP is <strong>${otp}</strong></p>`
-    });
-    
-    
-    return data; 
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        // 1. Sender must be your verified email on Brevo
+        sender: { name: "Solvify", email: "aasimsyed398@gmail.com" }, 
+        
+        // 2. Recipient must be an array of objects
+        to: [{ email: email }],
+        
+        subject: 'Verification OTP',
+        
+        // 3. Brevo uses 'htmlContent', not 'html'
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+            <h2>Verification Code</h2>
+            <p>Your OTP is:</p>
+            <h1 style="color: #F97316; letter-spacing: 5px;">${otp}</h1>
+            <p>This code is valid for 10 minutes.</p>
+          </div>
+        `
+      },
+      {
+        headers: {
+          'accept': 'application/json',
+          'api-key': process.env.BREVO_PASS, // Reads from your .env
+          'content-type': 'application/json',
+        },
+      }
+    );
+
+    console.log(`✅ OTP sent to ${email}. ID: ${response.data.messageId}`);
+    return response.data;
 
   } catch (error) {
-    console.log("Email Service Error:", error);
-    
-    return null; 
+    console.error("❌ Email Service Error:", error.response?.data || error.message);
+    return null;
   }
 };
+
+
+
+
 
 export { sendEmail, generateOtp };
