@@ -12,9 +12,13 @@ const attendanceSchema = new mongoose.Schema({
   records: [{
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User' 
+      ref: 'User', // This MUST match the name of your User model
+      required: true
     },
-    name: String,
+    name: {
+      type: String,
+      required: true
+    },
     status: {
       type: String,
       enum: ['PRESENT', 'ABSENT'],
@@ -23,7 +27,8 @@ const attendanceSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
-// OLD (CommonJS): module.exports = mongoose.model('Attendance', attendanceSchema);
-// NEW (ES Modules):
+// Create the model
 const Attendance = mongoose.model('Attendance', attendanceSchema);
-export  { Attendance };
+
+
+export { Attendance };

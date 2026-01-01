@@ -2,7 +2,7 @@ import express from "express"
 import ConnectDb from "./src/db.js"
 import dotenv from "dotenv";
 import cors from "cors";
-import   './src/utils/WhatsappClient.js';
+
 
 
 
