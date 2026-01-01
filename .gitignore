@@ -120,3 +120,7 @@ dist
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 
 task.txt/
+
+
+.wwebjs_auth
+.wwebjs_cache

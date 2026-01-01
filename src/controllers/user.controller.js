@@ -75,7 +75,6 @@ if (!createdUser) {
 }
 
 
-
 return res.json(
     new ApiResponse(200, "User Registered Successfully")
 )

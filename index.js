@@ -2,7 +2,7 @@ import express from "express"
 import ConnectDb from "./src/db.js"
 import dotenv from "dotenv";
 import cors from "cors";
-
+import   './src/utils/WhatsappClient.js';
 
 
 
@@ -38,6 +38,10 @@ ConnectDb()
 // import routes here
 import userRouter from './src/routes/user.route.js';
 import otpRouter from "./src/routes/verifyUser.route.js";
+import markAttendenceRouter from "./src/routes/markAttendence.route.js";
+
+// use routes here
+app.use("/api/v1/attendence", markAttendenceRouter);
 
 // routes declaration
 
