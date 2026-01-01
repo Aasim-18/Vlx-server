@@ -1,35 +1,35 @@
-import { Resend } from 'resend';
+import axios from 'axios';
+import dotenv from 'dotenv';
 
-// Initialize the Resend Client
-// Make sure RESEND_API_KEY is in your .env file
-const resend = new Resend(process.env.RESEND_API_KEY);
+dotenv.config();
 
-/**
- * Sends an email using Resend
- * @param {string} to - The recipient's email address
- * @param {string} subject - The subject line
- * @param {string} htmlContent - The HTML body of the email
- */
+// ⚠️ REPLACE WITH YOUR NEW *API* KEY (starts with 'xkeysib-')
+const BREVO_API_KEY = process.env.BREVO_PASS;
+
 export const sendEmail = async (to, subject, htmlContent) => {
-    try {
-        const data = await resend.emails.send({
-            
-            from: 'onboarding@resend.dev', 
-            to: to,
-            subject: subject,
-            html: htmlContent,
-        });
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: { name: "Solvify", email: "aasimsyed398@gmail.com" }, // Must match your verified sender
+        to: [{ email: to }],
+        subject: subject,
+        htmlContent: htmlContent,
+      },
+      {
+        headers: {
+          'accept': 'application/json',
+          'api-key': BREVO_API_KEY, // Auth happens here
+          'content-type': 'application/json',
+        },
+      }
+    );
 
-        if (data.error) {
-            console.error(`❌ Resend API Error for ${to}:`, data.error);
-            return false;
-        }
-
-        console.log(`📩 Email sent successfully to ${to}. ID: ${data.data?.id}`);
-        return true;
-
-    } catch (error) {
-        console.error(`❌ Unexpected Error sending to ${to}:`, error);
-        return false;
-    }
+    console.log(`✅ Email sent via API to ${to}. MessageId: ${response.data.messageId}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ API Error for ${to}:`, error.response?.data || error.message);
+    // Do not throw, so the loop continues for other students
+    return false;
+  }
 };
