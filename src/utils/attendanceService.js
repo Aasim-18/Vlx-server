@@ -13,9 +13,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export const sendEmail = async (to, subject, htmlContent) => {
     try {
         const data = await resend.emails.send({
-            // IMPORTANT: Use this exact email for testing (Free Tier)
-            // Or use your verified domain like 'admin@coachflow.com'
-            from: 'CoachFlow <onboarding@resend.dev>', 
+            
+            from: 'onboarding@resend.dev', 
             to: to,
             subject: subject,
             html: htmlContent,
