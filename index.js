@@ -14,6 +14,14 @@ dotenv.config({
 const app = express()
 
 app.use(express.json());
+app.use((err, req, res, next) => {
+  // Catch bad JSON errors
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.error('❌ JSON Parse Error:', err.message);
+    return res.status(400).json({ success: false, message: 'Invalid JSON payload sent' });
+  }
+  next();
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
@@ -40,10 +48,12 @@ import userRouter from './src/routes/user.route.js';
 import otpRouter from "./src/routes/verifyUser.route.js";
 import markAttendenceRouter from "./src/routes/markAttendence.route.js";
 
-// use routes here
-app.use("/api/v1/attendence", markAttendenceRouter);
+
+
 
 // routes declaration
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/users", otpRouter);
+app.use("/api/v1/attendence", markAttendenceRouter);
+app.use("/api/v1/students", userRouter);

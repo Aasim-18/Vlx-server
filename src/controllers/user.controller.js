@@ -223,9 +223,21 @@ const verifyOtp = asyncHandler(async (req, res) => {
   );
 });
 
+const getAllStudents = asyncHandler( async (req, res) => {
+  const users = await User.find({selectedRole: "student"}).select("_id fullName EnrollmentNumber email phone");
+
+   if (!users) {
+    throw new ApiError(500, "Somthing went wrong while fetching students")
+   }
+     return res.status(200).json({
+      success: true,
+      data: users
+    });
+  
+});
  
 
 
 
 
-export {registerUser, verifyOtp, Otpgenerate, loginUser}
+export {registerUser, verifyOtp, Otpgenerate, loginUser, getAllStudents};
